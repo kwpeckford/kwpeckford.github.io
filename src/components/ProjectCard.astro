@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import type { Project } from '../lib';
+interface Props { project: Project }
+const { project } = Astro.props;
+const { title, summary, tech, tags, cover, coverAlt, draft } = project.data;
+const label = tags[0] ?? tech[0];
+---
+<article class="card">
+  {cover ? (
+    <Image src={cover} alt={coverAlt ?? ''} widths={[480, 960]} sizes="(max-width: 700px) 100vw, 400px" class="cover" />
+  ) : (
+    <div class="cover placeholder" aria-hidden="true"><span>{title.slice(0, 1)}</span></div>
+  )}
+  <div class="body">
+    <p class="meta-row">
+      {label && <span class="pill">{label}</span>}
+      {draft && <span class="pill">Draft</span>}
+      {tech.length > 0 && <span class="tech">{tech.slice(0, 3).join(' · ')}</span>}
+    </p>
+    <h3><a href={`/projects/${project.id}/`}>{title}</a></h3>
+    <p class="summary">{summary}</p>
+  </div>
+  <span class="go" aria-hidden="true">↗</span>
+</article>
+
+<style>
+  .card { position: relative; display: flex; flex-direction: column; background: var(--card); border-radius: var(--radius); overflow: hidden; font-family: var(--font-sans); transition: transform 0.2s; }
+  .card:hover { transform: translateY(-3px); }
+  .cover { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+  .placeholder { display: grid; place-items: center; background: linear-gradient(135deg, var(--bg-soft), var(--rule)); font-size: 4rem; font-weight: 300; color: var(--text-muted); }
+  .body { padding: 1.25rem 1.35rem 1.5rem; }
+  .meta-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+  .pill { background: var(--invert-bg); color: var(--invert-text); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; border-radius: 999px; padding: 0.15rem 0.55rem; }
+  h3 { margin: 0 0 0.4rem; font-size: 1.2rem; font-weight: 450; }
+  h3 a { color: var(--text); text-decoration: none; }
+  h3 a::after { content: ''; position: absolute; inset: 0; }
+  .summary { margin: 0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.55; }
+  .go { position: absolute; top: 0.9rem; right: 0.9rem; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--invert-bg); color: var(--invert-text); opacity: 0; transform: scale(0.85); transition: opacity 0.2s, transform 0.2s; }
+  .card:hover .go, .card:focus-within .go { opacity: 1; transform: scale(1); }
+</style>

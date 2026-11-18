@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+<Base title="About" description="About Kitchener Peckford: commission plans, the data models behind them, and a lot of curiosity.">
+  <div class="container">
+    <article class="prose">
+      <p class="eyebrow">About</p>
+      <h1>About me</h1>
+
+      <h2>What I do</h2>
+      <p>
+        I help companies determine why and how to pay their employees commissions. Above that, I
+        build the actual data model that services it, and all of the other pieces behind it.
+      </p>
+      <p>
+        Let’s say for every candy bar you sold to people, I was to pay you 20 cents. That would be
+        easy. Now let’s make it more complex: I let you dictate the cost of every candy bar, but I
+        will only pay you a commission on a percentage above 3 dollars. This alone is complex to
+        figure out. Now imagine there are several more layers to this problem, and then doing it
+        for 40,000 employees.
+      </p>
+      <p>I build the data model to do these calculations consistently.</p>
+
+      <h2>Something I believe</h2>
+      <p>
+        As consultants, especially at the technical level, we are told our job is to do the
+        technical piece. But the more I get into this type of job, the more I see it’s not just
+        about the technical aspect. It’s about being able to articulate it, so that once you’re
+        done working on your piece, you can pass it off to someone and they can understand it.
+      </p>
+      <p>
+        I’m not the best at that. I know a lot of people feel like it’s a waste of time, but I
+        think it’s so important. If it was any other product, like a consumer product, it would get
+        so much pushback. But because it’s consulting, we kind of just forget it. And I think
+        that’s just so ridiculous.
+      </p>
+
+      <h2>Things I could talk about for hours</h2>
+      <ul>
+        <li>How AI is changing the landscape of everything we do.</li>
+        <li>Bikes, and the biking scene I grew up in.</li>
+        <li>
+          Working with small businesses to figure out how to grow their businesses. Anytime I get
+          to talk to a friend about how to automate pieces of their business or how to look at
+          analytics, I love those conversations, and I’m working on those types of things.
+        </li>
+        <li>Sports. I play ball hockey twice a week, and I love just keeping active.</li>
+      </ul>
+
+      <h2>Things that surprise people</h2>
+      <ul>
+        <li>I’m not actually named after the city.</li>
+        <li>
+          I don’t have the typical background you’d expect for where I work. A lot of my friends
+          look at the situation and ask, why is Kitchener doing what he’s doing? He was never good
+          at math. For me, I was just curious, and that’s how I got into all this.
+        </li>
+        <li>I’m incredibly curious, and I don’t stop thinking about things.</li>
+      </ul>
+
+      <h2 id="contact">Get in touch</h2>
+      <ul class="contact">
+        {SITE.email && <li>Email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>}
+        <li>LinkedIn: <a href={SITE.linkedin} rel="me noopener">linkedin.com/in/kpeckford</a></li>
+        {SITE.github && <li>GitHub: <a href={SITE.github} rel="me noopener">{SITE.github.replace('https://', '')}</a></li>}
+        <li>RSS: <a href="/rss.xml">subscribe to new posts</a></li>
+      </ul>
+    </article>
+  </div>
+</Base>
+<style>.contact { list-style: none; padding: 0; } .contact li { margin-bottom: 0.4rem; }</style>

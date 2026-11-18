@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, slugifyTag } from '../../lib';
+const posts = await getPosts();
+const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b));
+---
+<Base title="Writing" description="Essays, technical pieces and personal stories by Kitchener Peckford.">
+  <div class="container">
+    <header class="measure head">
+      <p class="eyebrow">Writing</p>
+      <h1>Writing</h1>
+      <p class="lede">Essays on AI and work, technical pieces, and the occasional personal story.</p>
+      {tags.length > 0 && (
+        <nav aria-label="Filter by tag">
+          <ul class="tags">
+            <li><a class="tag" href="/writing/" aria-current="page">All</a></li>
+            {tags.map((t) => <li><a class="tag" href={`/writing/tags/${slugifyTag(t)}/`}>{t}</a></li>)}
+          </ul>
+        </nav>
+      )}
+    </header>
+    {posts.length ? <PostList posts={posts} /> : <p class="meta">Nothing published yet.</p>}
+  </div>
+</Base>
+<style>.head { margin-bottom: 3rem; } .head h1 { margin-bottom: 1rem; } .head .lede { margin-bottom: 1.75rem; }</style>

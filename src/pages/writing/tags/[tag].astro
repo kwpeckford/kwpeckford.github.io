@@ -1,0 +1,31 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PostList from '../../../components/PostList.astro';
+import { getPosts, slugifyTag, type Post } from '../../../lib';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort((a, b) => a.localeCompare(b));
+  return tags.map((tag) => ({
+    params: { tag: slugifyTag(tag) },
+    props: { tag, posts: posts.filter((p) => p.data.tags.includes(tag)), allTags: tags },
+  }));
+}
+const { tag, posts, allTags } = Astro.props as { tag: string; posts: Post[]; allTags: string[] };
+---
+<Base title={`Writing tagged “${tag}”`}>
+  <div class="container">
+    <header class="measure head">
+      <p class="eyebrow">Writing</p>
+      <h1>Tagged “{tag}”</h1>
+      <nav aria-label="Filter by tag">
+        <ul class="tags">
+          <li><a class="tag" href="/writing/">All</a></li>
+          {allTags.map((t) => <li><a class="tag" href={`/writing/tags/${slugifyTag(t)}/`} aria-current={t === tag ? 'page' : undefined}>{t}</a></li>)}
+        </ul>
+      </nav>
+    </header>
+    <PostList posts={posts} />
+  </div>
+</Base>
+<style>.head { margin-bottom: 3rem; } .head h1 { margin-bottom: 1.25rem; } .muted { color: var(--text-muted); font-weight: 400; }</style>

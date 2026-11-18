@@ -1,0 +1,49 @@
+---
+import { SITE, NAV } from '../site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="top">
+      <div>
+        <p class="kicker">Have a question, an idea, or just want to say hi?</p>
+        {SITE.email
+          ? <a class="big" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          : <a class="big" href={SITE.linkedin} rel="me noopener">Say hello on LinkedIn</a>}
+      </div>
+    </div>
+    <div class="bottom">
+      <ul class="nav">
+        <li><a href="/">Home</a></li>
+        {NAV.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+      </ul>
+      <ul class="nav">
+        <li><a href={SITE.linkedin} rel="me noopener">LinkedIn</a></li>
+        {SITE.github && <li><a href={SITE.github} rel="me noopener">GitHub</a></li>}
+        <li><a href="/rss.xml">RSS</a></li>
+      </ul>
+      <p class="copy">© {year} {SITE.author} · {SITE.location}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--footer-bg); color: #ece6d8; font-family: var(--font-sans);
+    border-radius: 28px 28px 0 0; margin-top: 3rem;
+  }
+  :global(:root[data-theme='dark']) .site-footer { border-top: 1px solid var(--rule); }
+  .top { padding: clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .kicker { color: #b3b9a8; margin: 0 0 0.75rem; font-size: 1rem; }
+  .big {
+    color: #ece6d8; text-decoration: none; font-weight: 350; letter-spacing: -0.035em; line-height: 1.1;
+    font-size: clamp(1.75rem, 1rem + 4.2vw, 4.25rem); overflow-wrap: anywhere;
+  }
+  .big:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.15em; }
+  .bottom { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1.5rem 0 2rem; border-top: 1px solid rgba(236,230,216,0.15); font-size: 0.9rem; }
+  .nav { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
+  .nav a { color: #ece6d8; text-decoration: none; padding: 0.35rem 0.8rem; border-radius: 999px; }
+  .nav a:hover { background: rgba(236,230,216,0.1); }
+  .copy { margin: 0 0 0 auto; color: #b3b9a8; }
+  .site-footer :global(:focus-visible) { outline-color: #8fb4ff; }
+</style>

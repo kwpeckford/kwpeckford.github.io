@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import { getProjects } from '../../lib';
+const projects = await getProjects();
+---
+<Base title="Projects" description="Technical side projects by Kitchener Peckford.">
+  <div class="container">
+    <header class="measure head">
+      <p class="eyebrow">Projects</p>
+      <h1>Projects</h1>
+      <p class="lede">Things I’ve built on the side: tools, experiments and small demos.</p>
+    </header>
+    {projects.length ? <ProjectGrid projects={projects} /> : <p class="meta">Nothing here yet.</p>}
+  </div>
+</Base>
+<style>.head { margin-bottom: 3rem; } .head h1 { margin-bottom: 1rem; }</style>

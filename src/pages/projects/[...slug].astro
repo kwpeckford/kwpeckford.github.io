@@ -1,0 +1,42 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Post from '../../layouts/Post.astro';
+import { getProjects, type Project } from '../../lib';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+const { project } = Astro.props as { project: Project };
+const { Content } = await render(project);
+const d = project.data;
+---
+<Post {...d} backHref="/projects/" backLabel="All projects">
+  <div slot="before" class="measure facts">
+    {(d.repo || d.demo) && (
+      <p class="links">
+        {d.demo && <a class="btn primary" href={d.demo} rel="noopener">Live demo ↗</a>}
+        {d.repo && <a class="btn" href={d.repo} rel="noopener">Code on GitHub ↗</a>}
+      </p>
+    )}
+    {d.tech.length > 0 && (
+      <dl><dt>Built with</dt><dd>{d.tech.join(' · ')}</dd></dl>
+    )}
+    {d.cover && <Image src={d.cover} alt={d.coverAlt ?? ''} widths={[700, 1400]} sizes="(max-width: 760px) 100vw, 700px" class="cover" />}
+  </div>
+  <Content />
+</Post>
+
+<style>
+  .facts { margin: -1.5rem 0 3rem; font-family: var(--font-sans); }
+  .links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn { font-size: 0.9rem; font-weight: 500; text-decoration: none; border: 1px solid var(--rule); border-radius: 999px; padding: 0.5rem 1.1rem; color: var(--text); }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .btn.primary:hover { background: var(--accent-hover); color: var(--bg); }
+  dl { display: flex; gap: 0.75rem; font-size: 0.9rem; margin: 0 0 1.5rem; }
+  dt { color: var(--text-muted); }
+  dd { margin: 0; }
+  .cover { border-radius: var(--radius); border: 1px solid var(--rule); margin-top: 1rem; }
+</style>

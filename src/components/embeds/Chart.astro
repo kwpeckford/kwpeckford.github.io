@@ -1,0 +1,97 @@
+---
+/**
+ * <Chart> — a bar or line chart drawn as plain SVG at build time.
+ * No JavaScript is shipped, so it is fast, accessible and works with the CSP.
+ *
+ * Usage in an .mdx post:
+ *   import Chart from '../../components/embeds/Chart.astro';
+ *   <Chart title="Payout by quarter" type="bar"
+ *          labels={['Q1','Q2','Q3','Q4']}
+ *          series={[{ name: '2025', values: [12, 18, 15, 22] }]}
+ *          unit="$k" />
+ */
+interface Series { name: string; values: number[] }
+interface Props {
+  title: string;
+  labels: string[];
+  series: Series[];
+  type?: 'bar' | 'line';
+  unit?: string;        // appended to values in the table and axis, e.g. '%', '$k'
+  caption?: string;
+}
+const { title, labels, series, type = 'bar', unit = '', caption } = Astro.props;
+
+const W = 640, H = 300, pad = { t: 16, r: 12, b: 36, l: 48 };
+const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+const all = series.flatMap((s) => s.values);
+const rawMax = Math.max(0, ...all);
+const rawMin = Math.min(0, ...all);
+const niceStep = (range: number) => {
+  const raw = range / 4 || 1;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / mag;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * mag;
+};
+const step = niceStep(rawMax - rawMin);
+const yMax = Math.ceil(rawMax / step) * step || step;
+const yMin = Math.floor(rawMin / step) * step;
+const ticks: number[] = [];
+for (let v = yMin; v <= yMax + 1e-9; v += step) ticks.push(+v.toFixed(10));
+const y = (v: number) => pad.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+const band = iw / labels.length;
+const xCenter = (i: number) => pad.l + band * i + band / 2;
+const fmt = (v: number) => `${v.toLocaleString('en-CA')}${unit}`;
+const groupW = band * 0.7;
+const barW = groupW / series.length;
+const colors = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)'];
+---
+<figure class="embed chart">
+  <p class="embed-title">{title}</p>
+  {series.length > 1 && (
+    <ul class="legend">{series.map((s, i) => <li><span style={`background:${colors[i % 4]}`}></span>{s.name}</li>)}</ul>
+  )}
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}. Data in the table below.`}>
+    {ticks.map((t) => (
+      <g>
+        <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} class={t === 0 ? 'zero' : 'grid'} />
+        <text x={pad.l - 8} y={y(t)} class="tick" text-anchor="end" dominant-baseline="middle">{fmt(t)}</text>
+      </g>
+    ))}
+    {labels.map((l, i) => <text x={xCenter(i)} y={H - pad.b + 20} class="tick" text-anchor="middle">{l}</text>)}
+    {type === 'bar'
+      ? series.map((s, si) => s.values.map((v, i) => {
+          const x = xCenter(i) - groupW / 2 + si * barW;
+          const top = y(Math.max(v, 0)), bottom = y(Math.min(v, 0));
+          return <rect x={x + 1} y={top} width={Math.max(barW - 2, 1)} height={Math.max(bottom - top, 0)} rx="2" fill={colors[si % 4]}><title>{`${s.name}, ${labels[i]}: ${fmt(v)}`}</title></rect>;
+        }))
+      : series.map((s, si) => (
+          <g>
+            <polyline fill="none" stroke={colors[si % 4]} stroke-width="2.5" stroke-linejoin="round" points={s.values.map((v, i) => `${xCenter(i)},${y(v)}`).join(' ')} />
+            {s.values.map((v, i) => <circle cx={xCenter(i)} cy={y(v)} r="3.5" fill={colors[si % 4]}><title>{`${s.name}, ${labels[i]}: ${fmt(v)}`}</title></circle>)}
+          </g>
+        ))}
+  </svg>
+  <details>
+    <summary>Show data</summary>
+    <table>
+      <thead><tr><th scope="col"></th>{series.map((s) => <th scope="col">{s.name}</th>)}</tr></thead>
+      <tbody>{labels.map((l, i) => <tr><th scope="row">{l}</th>{series.map((s) => <td>{fmt(s.values[i])}</td>)}</tr>)}</tbody>
+    </table>
+  </details>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .chart { --chart-1: var(--accent); --chart-2: #b08d57; --chart-3: #6f8f86; --chart-4: #8a6a5a; }
+  :global(:root[data-theme='dark']) .chart { --chart-2: #d9b98a; --chart-3: #9fc1b8; --chart-4: #c9a492; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .grid { stroke: var(--rule); stroke-width: 1; }
+  .zero { stroke: var(--text-muted); stroke-width: 1; }
+  .tick { fill: var(--text-muted); font-size: 12px; font-family: var(--font-sans); }
+  .legend { display: flex; gap: 1rem; list-style: none; padding: 0; margin: -0.5rem 0 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+  .legend span { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: 2px; margin-right: 0.35rem; vertical-align: -1px; }
+  details { margin-top: 0.75rem; font-size: 0.85rem; }
+  summary { cursor: pointer; color: var(--text-muted); }
+  table { margin: 0.75rem 0 0; display: table; width: auto; }
+  figcaption { margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted); }
+</style>

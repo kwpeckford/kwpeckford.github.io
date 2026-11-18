@@ -1,0 +1,59 @@
+---
+// Adds a "Copy" button to every code block, and renders ```mermaid blocks
+// as diagrams. Mermaid is loaded only on pages that contain a diagram.
+---
+<script>
+  function addCopyButtons() {
+    document.querySelectorAll<HTMLPreElement>('.prose pre.astro-code').forEach((pre) => {
+      if (pre.querySelector('.copy-btn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.setAttribute('aria-label', 'Copy code to clipboard');
+      btn.addEventListener('click', async () => {
+        const code = pre.querySelector('code')?.innerText ?? '';
+        try {
+          await navigator.clipboard.writeText(code);
+          btn.textContent = 'Copied';
+        } catch {
+          btn.textContent = 'Press ⌘C';
+        }
+        btn.dataset.copied = '';
+        setTimeout(() => { btn.textContent = 'Copy'; delete btn.dataset.copied; }, 1600);
+      });
+      pre.appendChild(btn);
+    });
+  }
+
+  async function renderDiagrams() {
+    const sources = document.querySelectorAll<HTMLElement>('.prose pre > code.language-mermaid, .prose pre[data-language="mermaid"]');
+    if (!sources.length) return;
+    const { default: mermaid } = await import('mermaid');
+    const containers: { el: HTMLElement; src: string }[] = [];
+    sources.forEach((node) => {
+      const pre = (node.tagName === 'PRE' ? node : node.parentElement) as HTMLElement;
+      const src = node.textContent ?? '';
+      const div = document.createElement('div');
+      div.className = 'diagram';
+      div.setAttribute('role', 'img');
+      div.setAttribute('aria-label', 'Diagram');
+      pre.classList.add('mermaid-source');
+      pre.after(div);
+      containers.push({ el: div, src });
+    });
+    const draw = async () => {
+      const dark = document.documentElement.dataset.theme === 'dark';
+      mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'strict', fontFamily: 'Inter Variable, sans-serif' });
+      for (const [i, c] of containers.entries()) {
+        const { svg } = await mermaid.render(`mmd-${i}-${Date.now()}`, c.src);
+        c.el.innerHTML = svg;
+      }
+    };
+    await draw();
+    document.addEventListener('themechange', draw);
+  }
+
+  addCopyButtons();
+  renderDiagrams();
+</script>

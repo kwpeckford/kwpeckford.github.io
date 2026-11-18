@@ -1,0 +1,75 @@
+---
+/**
+ * <CommissionCalculator> — an example interactive embed.
+ * Pattern for any interactive element:
+ *   1. Markup with a wrapping element marked by a data- attribute.
+ *   2. A <script> (bundled by Astro, so it passes the CSP) that finds every
+ *      instance on the page and wires it up. Settings go in data- attributes.
+ */
+interface Props {
+  title?: string;
+  target?: number;   // quota
+  baseRate?: number; // % paid up to quota
+  accelRate?: number; // % paid above quota
+}
+const { title = 'Tiered commission calculator', target = 500000, baseRate = 4, accelRate = 7 } = Astro.props;
+---
+<div class="embed calc" data-commission-calc data-target={target} data-base={baseRate} data-accel={accelRate}>
+  <p class="embed-title">{title}</p>
+  <div class="fields">
+    <div>
+      <label>Sales achieved <output data-out="sales"></output></label>
+      <input type="range" data-in="sales" min="0" max={target * 2} step={target / 100} value={target} aria-label="Sales achieved" />
+    </div>
+    <div>
+      <label>Quota</label>
+      <input type="number" data-in="target" value={target} min="1" step="1000" aria-label="Quota" />
+    </div>
+    <div>
+      <label>Rate to quota (%)</label>
+      <input type="number" data-in="base" value={baseRate} min="0" step="0.5" aria-label="Rate up to quota (percent)" />
+    </div>
+    <div>
+      <label>Rate above quota (%)</label>
+      <input type="number" data-in="accel" value={accelRate} min="0" step="0.5" aria-label="Rate above quota (percent)" />
+    </div>
+  </div>
+  <dl class="results" aria-live="polite">
+    <div><dt>Attainment</dt><dd data-out="attain"></dd></div>
+    <div><dt>Commission</dt><dd data-out="pay"></dd></div>
+    <div><dt>Effective rate</dt><dd data-out="eff"></dd></div>
+  </dl>
+</div>
+
+<style>
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+  .fields > div:first-child { grid-column: 1 / -1; }
+  output { float: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.25rem 0 0; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  dt { font-size: 0.8rem; color: var(--text-muted); }
+  dd { margin: 0.15rem 0 0; font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  @media (max-width: 420px) { .results { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  const money = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+  document.querySelectorAll<HTMLElement>('[data-commission-calc]').forEach((root) => {
+    const input = (k: string) => root.querySelector<HTMLInputElement>(`[data-in="${k}"]`)!;
+    const out = (k: string) => root.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+    const update = () => {
+      const sales = +input('sales').value;
+      const target = Math.max(1, +input('target').value);
+      const base = +input('base').value / 100;
+      const accel = +input('accel').value / 100;
+      input('sales').max = String(target * 2);
+      input('sales').step = String(target / 100);
+      const pay = Math.min(sales, target) * base + Math.max(0, sales - target) * accel;
+      out('sales').textContent = money.format(sales);
+      out('attain').textContent = `${Math.round((sales / target) * 100)}%`;
+      out('pay').textContent = money.format(pay);
+      out('eff').textContent = sales ? `${((pay / sales) * 100).toFixed(2)}%` : '—';
+    };
+    root.addEventListener('input', update);
+    update();
+  });
+</script>

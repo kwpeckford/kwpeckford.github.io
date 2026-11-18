@@ -1,0 +1,12 @@
+# Opens a pull request when a dependency or GitHub Action has a security fix
+# or a new version. Nothing updates without you (or Claude) merging it.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: monthly }
+    groups:
+      all-npm: { patterns: ['*'] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
