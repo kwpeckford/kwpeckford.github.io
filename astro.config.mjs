@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // SITE_URL is the public address of the site. Change it once the custom
 // domain (or GitHub Pages URL) is known. RSS and the sitemap depend on it.
-const SITE_URL = 'https://kwpeckford.github.io';
+const SITE_URL = 'https://kitchnr.ca';
 
 export default defineConfig({
   site: SITE_URL,

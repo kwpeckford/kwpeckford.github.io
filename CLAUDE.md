@@ -4,7 +4,7 @@ Instructions for Claude Code sessions working on this repo. Read this first and 
 
 ## What this is
 
-A static personal site (blog + side projects) built with **Astro 7**, written in Markdown/MDX, and deployed for free to **GitHub Pages** by GitHub Actions on every push to `main`. There is no server, no database, no paid service and no API key.
+A static personal site (blog + side projects) built with **Astro 7**, written in Markdown/MDX, and deployed for free to **GitHub Pages** by GitHub Actions on every push to `main`. Live at **https://kitchnr.ca** (repo: github.com/kwpeckford/kwpeckford.github.io). There is no server, no database, no paid service and no API key.
 
 ## Ground rules
 
@@ -138,7 +138,8 @@ In the Claude desktop app, `.claude/launch.json` defines the `site` preview serv
 
 - Pushing to `main` triggers `.github/workflows/deploy.yml`: `npm ci` → `npm audit` (fails on high/critical vulnerabilities) → `npm run build` → upload `dist/` → deploy to GitHub Pages. It takes about 1–2 minutes. Check the **Actions** tab on GitHub if a deploy fails.
 - The workflow uses only GitHub's short-lived built-in token, with `contents: read`, `pages: write` and `id-token: write`. No secrets are configured or needed.
-- `site` in `astro.config.mjs` must match the public URL, because canonical links, RSS and the sitemap use it. Update it if the domain changes. With a custom domain, also add `public/CNAME` containing just the domain.
+- `site` in `astro.config.mjs` must match the public URL, because canonical links, RSS and the sitemap use it. Update it if the domain changes.
+- Custom domain: `kitchnr.ca`, registered and DNS-hosted at Namecheap (A/AAAA records to GitHub Pages IPs, `www` CNAME to `kwpeckford.github.io`), verified in Kitchener's GitHub account, and set in repo Settings → Pages with HTTPS enforced. Because the site deploys via Actions, no `CNAME` file is needed. Ask Kitchener before touching DNS or Pages settings.
 - Dependabot opens monthly PRs for npm and Actions updates. To merge one: check it out, run `npm run build`, and merge if it passes.
 
 ## Security
